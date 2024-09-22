@@ -1,14 +1,18 @@
-version: "3.9"  # Specify a version that supports the features you need
+# version is now using "compose spec"
+# v2 and v3 are now combined!
+# docker-compose v1.27+ required
+
+version: "3.3"  # Use a version that is supported by your Docker Compose
 
 services:
   vote:
-    build:
+    build: 
       context: ./vote
       target: dev
     depends_on:
       redis:
         condition: service_healthy
-    healthcheck:
+    healthcheck: 
       test: ["CMD", "curl", "-f", "http://localhost"]
       interval: 15s
       timeout: 5s
@@ -23,12 +27,12 @@ services:
       - back-tier
 
   result:
-    build:
+    build: 
       context: ./result
     entrypoint: nodemon --inspect=0.0.0.0 server.js
     depends_on:
       db:
-        condition: service_healthy
+        condition: service_healthy 
     volumes:
       - ./result:/usr/local/app
     ports:
@@ -43,9 +47,9 @@ services:
       context: ./worker
     depends_on:
       redis:
-        condition: service_healthy
+        condition: service_healthy 
       db:
-        condition: service_healthy
+        condition: service_healthy 
     networks:
       - back-tier
 
@@ -73,14 +77,16 @@ services:
     networks:
       - back-tier
 
+  # This service runs once to seed the database with votes
+  # It won't run unless you specify the "seed" profile
+  # docker compose --profile seed up -d
   seed:
-    build:
-      context: ./seed-data
+    build: ./seed-data
     profiles:
       - seed
     depends_on:
       vote:
-        condition: service_healthy
+        condition: service_healthy 
     networks:
       - front-tier
     restart: "no"
